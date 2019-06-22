@@ -6,6 +6,10 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 
 import { Hero } from "./hero";
 
+const httpOptions = {
+  headers: new HttpHeaders({ "Content-Type": "application/json" })
+};
+
 @Injectable({
   providedIn: "root"
 })
@@ -46,17 +50,35 @@ export class HeroService {
     );
   }
 
-  // getHero(id: number): Observable<Hero> {
-  //   // this.messageService.add(`HeroService: fetched hero id=${id}`);
-  //   // return of(HEROES.find(hero => hero.id === id));
-  //   console.log("idk yet");
-  // }
-
   getHero(id: number): Observable<Hero> {
     const url = `${this.heroesUrl}/${id}`;
     return this.http.get<Hero>(url).pipe(
       tap(_ => this.log(`fetched hero id=${id}`)),
       catchError(this.handleError<Hero>(`getHero id=${id}`))
+    );
+  }
+
+  updateHero(hero: Hero): Observable<any> {
+    return this.http.put(this.heroesUrl, hero, httpOptions).pipe(
+      tap(_ => this.log(`updated hero id=${hero.id}`)),
+      catchError(this.handleError<any>("updateHero"))
+    );
+  }
+
+  addHero(hero: Hero): Observable<Hero> {
+    return this.http.post(this.heroesUrl, hero, httpOptions).pipe(
+      tap((newHero: Hero) => this.log(`added hero with id=${newHero.id}`)),
+      catchError(this.handleError<Hero>("addHero"))
+    );
+  }
+
+  deleteHero(hero: Hero | number): Observable<Hero> {
+    const id = typeof hero === "number" ? hero : hero.id;
+    const url = `${this.heroesUrl}/${id}`;
+
+    return this.http.delete<Hero>(url, httpOptions).pipe(
+      tap(_ => this.log(`deleted hero id=${id}`)),
+      catchError(this.handleError<Hero>("deleteHero"))
     );
   }
 }
